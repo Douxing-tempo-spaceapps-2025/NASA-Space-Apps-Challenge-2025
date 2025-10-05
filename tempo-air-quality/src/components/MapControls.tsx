@@ -13,6 +13,7 @@ interface MapControlsProps {
   onTogglePrecipitation: (show: boolean) => void;
   onToggleTemperature: (show: boolean) => void;
   onToggleHumidity: (show: boolean) => void;
+  onLocateMe: () => void;
 }
 
 export default function MapControls({
@@ -26,6 +27,7 @@ export default function MapControls({
   onTogglePrecipitation,
   onToggleTemperature,
   onToggleHumidity,
+  onLocateMe,
 }: MapControlsProps) {
   const [showLegend, setShowLegend] = useState(false);
 
@@ -33,12 +35,39 @@ export default function MapControls({
     <div className="absolute top-4 right-4 z-10 bg-white rounded-lg shadow-lg border border-gray-200">
       {/* Control Panel */}
       <div className="p-4">
+        {/* Location control (placed above map layers) */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-800">Location</h3>
+          <button
+            onClick={onLocateMe}
+            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md shadow transition-colors"
+            title="Locate me"
+            aria-label="Locate"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 2a1 1 0 011 1v1.06A6.002 6.002 0 0116.94 9H18a1 1 0 110 2h-1.06A6.002 6.002 0 0111 15.94V17a1 1 0 11-2 0v-1.06A6.002 6.002 0 013.06 11H2a1 1 0 110-2h1.06A6.002 6.002 0 019 4.06V3a1 1 0 011-1zm0 5a3 3 0 100 6 3 3 0 000-6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="ml-2 text-xs font-medium">Locate</span>
+          </button>
+        </div>
+
         <h3 className="text-sm font-semibold text-gray-800 mb-3">Map Layers</h3>
 
         {/* Fire Data Toggle */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
+              <polygon points="12,4 20,20 4,20" fill="#ef4444" />
+            </svg>
             <span className="text-sm text-gray-700">Fire Data</span>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -142,42 +171,62 @@ export default function MapControls({
               </h5>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: "#FFB3B3" }}
-                  ></div>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <polygon points="12,4 20,20 4,20" fill="#FFB3B3" />
+                  </svg>
                   <span className="text-xs text-gray-600">Low (&lt;310K)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: "#FF9999" }}
-                  ></div>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <polygon points="12,4 20,20 4,20" fill="#FF9999" />
+                  </svg>
                   <span className="text-xs text-gray-600">
                     Medium-Low (310-330K)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: "#FF6666" }}
-                  ></div>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <polygon points="12,4 20,20 4,20" fill="#FF6666" />
+                  </svg>
                   <span className="text-xs text-gray-600">
                     Medium (330-350K)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: "#FF3333" }}
-                  ></div>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <polygon points="12,4 20,20 4,20" fill="#FF3333" />
+                  </svg>
                   <span className="text-xs text-gray-600">High (350-365K)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: "#CC0000" }}
-                  ></div>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <polygon points="12,4 20,20 4,20" fill="#CC0000" />
+                  </svg>
                   <span className="text-xs text-gray-600">
                     Very High (365K+)
                   </span>
@@ -299,35 +348,45 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#0D47A1" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very Cold (&lt;-10°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Very Cold (&lt;-10°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1565C0" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Cold (-10 to 0°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Cold (-10 to 0°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#42A5F5" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Cool (0 to 10°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Cool (0 to 10°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#90CAF9" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Mild (10 to 20°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Mild (10 to 20°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#FFB74D" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Warm (20 to 30°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Warm (20 to 30°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -355,7 +414,9 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#E3F2FD" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very Dry (&lt;30%)</span>
+                  <span className="text-xs text-gray-600">
+                    Very Dry (&lt;30%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -376,14 +437,18 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1E88E5" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Moderate (50-60%)</span>
+                  <span className="text-xs text-gray-600">
+                    Moderate (50-60%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1565C0" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Comfortable (60-70%)</span>
+                  <span className="text-xs text-gray-600">
+                    Comfortable (60-70%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import { FireDataService, FireDataRecord } from "../services/fireDataService";
 
@@ -18,128 +18,8 @@ export default function FireDataLayer({
   const [fireData, setFireData] = useState<FireDataRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
-
-  const createFireMarker = useCallback(
-    (fire: FireDataRecord): maplibregl.Marker => {
-      // Get fire intensity color based on brightness
-      const color = FireDataService.getFireIntensityColor(fire.brightness);
-      const intensity = FireDataService.getFireIntensityDescription(
-        fire.brightness
-      );
-      const dayNight = FireDataService.getDayNightDescription(fire.daynight);
-      const acquisitionTime = FireDataService.formatAcquisitionTime(
-        fire.acq_date,
-        fire.acq_time
-      );
-
-      // Create fire icon element - simple red dot
-      const el = document.createElement("div");
-      el.className = "fire-marker";
-
-      // Function to update marker size based on zoom level
-      const updateMarkerSize = () => {
-        const zoom = map.getZoom();
-        // Calculate size based on zoom level - make them bigger
-        // At zoom 10+: 12px, at zoom 8: 10px, at zoom 6: 8px, at zoom 4: 6px
-        // Minimum size: 6px, Maximum size: 12px
-        const size = Math.max(6, Math.min(12, 4 + zoom * 0.6));
-        el.style.width = `${size}px`;
-        el.style.height = `${size}px`;
-      };
-
-      // Initial size
-      updateMarkerSize();
-
-      // Get fire intensity color based on brightness
-      const fireColor = FireDataService.getFireIntensityColor(fire.brightness);
-
-      el.style.cssText = `
-      background-color: ${fireColor};
-      border: 1px solid white;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      z-index: 1000;
-      position: absolute;
-      transform: translate(-50%, -50%);
-      transition: all 0.2s ease-in-out;
-    `;
-
-      // Hover effects - only change shadow and size, no transform
-      el.addEventListener("mouseenter", () => {
-        el.style.boxShadow = "0 2px 8px rgba(255,68,68,0.6)";
-        const currentSize = parseFloat(el.style.width);
-        el.style.width = `${currentSize + 2}px`;
-        el.style.height = `${currentSize + 2}px`;
-      });
-
-      el.addEventListener("mouseleave", () => {
-        el.style.boxShadow = "0 1px 3px rgba(0,0,0,0.3)";
-        updateMarkerSize(); // Reset to zoom-based size
-      });
-
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([fire.longitude, fire.latitude])
-        .setPopup(
-          new maplibregl.Popup({ offset: 12 }).setHTML(`
-          <div class="p-3 min-w-[250px]">
-            <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
-              <span class="text-lg mr-2">🔥</span>
-              Fire Detection
-            </h3>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">Intensity:</span>
-                <div class="flex items-center gap-2">
-                  <span class="font-bold" style="color: ${color}">${intensity}</span>
-                  <span class="text-xs text-gray-500">(${fire.brightness.toFixed(
-                    1
-                  )}K)</span>
-                </div>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">Time:</span>
-                <span class="text-sm">${acquisitionTime}</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">Period:</span>
-                <span class="text-sm">${dayNight}</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">Satellite:</span>
-                <span class="text-sm">${fire.satellite}</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">Confidence:</span>
-                <span class="text-sm font-medium">${fire.confidence}</span>
-              </div>
-              <div class="flex justify-between items-center text-sm">
-                <span class="font-medium">FRP:</span>
-                <span class="text-sm">${fire.frp.toFixed(1)} MW</span>
-              </div>
-            </div>
-            <div class="mt-3 pt-2 border-t border-gray-200">
-              <p class="text-xs text-gray-500">
-                Coordinates: ${fire.latitude.toFixed(
-                  4
-                )}, ${fire.longitude.toFixed(4)}
-              </p>
-            </div>
-          </div>
-        `)
-        );
-
-      el.addEventListener("click", () => {
-        if (onFireClick) {
-          onFireClick(fire);
-        }
-      });
-
-      return marker;
-    },
-    [onFireClick, map]
-  );
+  const sourceId = useRef<string>(`fires-source`);
+  const pointLayerId = useRef<string>(`fires-point`);
 
   // Fetch fire data
   useEffect(() => {
@@ -162,52 +42,192 @@ export default function FireDataLayer({
     fetchFireData();
   }, []);
 
-  // Handle visibility changes
+  // Build GeoJSON from fireData
+  const toGeoJSON = (): GeoJSON.FeatureCollection<GeoJSON.Point, any> => {
+    return {
+      type: "FeatureCollection",
+      features: fireData.map((f) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [f.longitude, f.latitude],
+        },
+        properties: {
+          brightness: f.brightness,
+          intensityColor: FireDataService.getFireIntensityColor(f.brightness),
+          intensityText: FireDataService.getFireIntensityDescription(
+            f.brightness
+          ),
+          dayNight: FireDataService.getDayNightDescription(f.daynight),
+          acqTime: FireDataService.formatAcquisitionTime(
+            f.acq_date,
+            f.acq_time
+          ),
+          satellite: f.satellite,
+          confidence: f.confidence,
+          frp: f.frp,
+        },
+      })),
+    };
+  };
+
+  // Add/update source and layers
   useEffect(() => {
-    if (!map) return;
+    if (!map || fireData.length === 0) return;
 
-    if (!visible) {
-      // Hide all markers
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-    }
-  }, [map, visible]);
+    const srcId = sourceId.current;
+    const pointId = pointLayerId.current;
 
-  // Create fire markers
-  useEffect(() => {
-    if (!map || fireData.length === 0 || !visible) return;
+    const ensureLayers = () => {
+      // Add source if missing
+      if (!map.getSource(srcId)) {
+        map.addSource(srcId, {
+          type: "geojson",
+          data: toGeoJSON(),
+          // no clustering
+        } as any);
+      } else {
+        const src = map.getSource(srcId) as maplibregl.GeoJSONSource;
+        src.setData(toGeoJSON() as any);
+      }
 
-    // Clear existing markers
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
-
-    fireData.forEach((fire) => {
-      const fireMarker = createFireMarker(fire);
-      fireMarker.addTo(map);
-      markersRef.current.push(fireMarker);
-    });
-
-    // Add zoom event listener to update marker sizes
-    const handleZoom = () => {
-      markersRef.current.forEach((marker) => {
-        const element = marker.getElement();
-        if (element) {
-          const zoom = map.getZoom();
-          const size = Math.max(6, Math.min(12, 4 + zoom * 0.6));
-          element.style.width = `${size}px`;
-          element.style.height = `${size}px`;
-        }
-      });
+      // Points rendered as triangle symbol to distinguish from AQ stations
+      if (!map.getLayer(pointId)) {
+        map.addLayer({
+          id: pointId,
+          type: "symbol",
+          source: srcId,
+          layout: {
+            "text-field": "▲",
+            "text-size": 14,
+            "text-allow-overlap": true,
+            visibility: visible ? "visible" : "none",
+          },
+          paint: {
+            "text-color": ["get", "intensityColor"],
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1,
+          },
+        });
+      }
     };
 
-    map.on("zoom", handleZoom);
+    if (map.isStyleLoaded()) {
+      ensureLayers();
+    } else {
+      const onLoad = () => ensureLayers();
+      map.once("load", onLoad);
+    }
+
+    const onPointClick = (e: maplibregl.MapLayerMouseEvent) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: [pointId],
+      });
+      if (!features.length) return;
+      const f = features[0];
+      const p = f.properties as any;
+      const [lng, lat] = (f.geometry as any).coordinates;
+
+      const popupHtml = `
+        <div class="p-3 w-[360px] max-w-none">
+          <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
+            <span class="text-lg mr-2">🔥</span>
+            Fire Detection
+          </h3>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">Intensity:</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold" style="color: ${p.intensityColor}">${
+        p.intensityText
+      }</span>
+                <span class="text-xs text-gray-500">(${Number(
+                  p.brightness
+                ).toFixed(1)}K)</span>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">Time:</span>
+              <span class="text-sm">${p.acqTime}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">Period:</span>
+              <span class="text-sm">${p.dayNight}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">Satellite:</span>
+              <span class="text-sm">${p.satellite}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">Confidence:</span>
+              <span class="text-sm font-medium">${p.confidence}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-medium">FRP:</span>
+              <span class="text-sm">${Number(p.frp).toFixed(1)} MW</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-gray-200">
+            <p class="text-xs text-gray-500">Coordinates: ${lat.toFixed(
+              4
+            )}, ${lng.toFixed(4)}</p>
+          </div>
+        </div>
+      `;
+
+      new maplibregl.Popup({
+        offset: 12,
+        maxWidth: "none",
+        className: "fire-popup",
+      })
+        .setLngLat([lng, lat])
+        .setHTML(popupHtml)
+        .addTo(map);
+
+      if (onFireClick) {
+        onFireClick({
+          latitude: lat,
+          longitude: lng,
+          brightness: Number(p.brightness),
+          scan: 0,
+          track: 0,
+          acq_date: p.acqTime?.split(" ")[0] || "",
+          acq_time: (p.acqTime?.split(" ")[1] || "").replace(":", ""),
+          satellite: p.satellite,
+          confidence: p.confidence,
+          version: "",
+          bright_t31: 0,
+          frp: Number(p.frp),
+          daynight: p.dayNight === "Day" ? "D" : "N",
+        });
+      }
+    };
+
+    map.on("click", pointId, onPointClick);
 
     return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      map.off("zoom", handleZoom);
+      if (map.getLayer(pointId)) map.off("click", pointId, onPointClick);
+      // Do not remove layers/sources here; keep for visibility toggling
     };
-  }, [map, fireData, createFireMarker, visible]);
+  }, [map, fireData, visible, onFireClick]);
+
+  // Sync visibility
+  useEffect(() => {
+    const pointId = pointLayerId.current;
+    const vis = visible ? "visible" : "none";
+    if (map.getLayer(pointId))
+      map.setLayoutProperty(pointId, "visibility", vis);
+  }, [map, visible]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const srcId = sourceId.current;
+      const pointId = pointLayerId.current;
+      if (map.getLayer(pointId)) map.removeLayer(pointId);
+      if (map.getSource(srcId)) map.removeSource(srcId);
+    };
+  }, [map]);
 
   if (loading) {
     return (

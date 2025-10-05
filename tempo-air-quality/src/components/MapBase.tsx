@@ -6,7 +6,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import AirQualityClusterLayer from "./AirQualityClusterLayer";
 import FireDataLayer from "./FireDataLayer";
 import MapControls from "./MapControls";
-// Removed WSTIHeatmapLayer
 import { ProcessedStation } from "../services/airQualityService";
 import { FireDataRecord } from "../services/fireDataService";
 import { PrecipitationService } from "../services/precipitationService";
@@ -36,6 +35,17 @@ export default function MapBase({
   const [showTemperature, setShowTemperature] = useState(true);
   const [showHumidity, setShowHumidity] = useState(true);
 
+  // Keep refs of layer toggles to avoid re-creating the map on toggle
+  const showPrecipitationRef = useRef(showPrecipitation);
+  const showTemperatureRef = useRef(showTemperature);
+  const showHumidityRef = useRef(showHumidity);
+
+  useEffect(() => {
+    showPrecipitationRef.current = showPrecipitation;
+    showTemperatureRef.current = showTemperature;
+    showHumidityRef.current = showHumidity;
+  }, [showPrecipitation, showTemperature, showHumidity]);
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -48,13 +58,9 @@ export default function MapBase({
 
     mapRef.current = map;
 
-    // Update cursor style based on precipitation layer state
+    // Initial cursor style; will be kept in sync by another effect
     const mapCanvas = map.getCanvas();
-    if (showPrecipitation) {
-      mapCanvas.style.cursor = "crosshair";
-    } else {
-      mapCanvas.style.cursor = "";
-    }
+    mapCanvas.style.cursor = showPrecipitationRef.current ? "crosshair" : "";
 
     map.on("load", () => {
       setMapInstance(map);
@@ -62,8 +68,13 @@ export default function MapBase({
 
       // Add click event for weather data
       map.on("click", async (e) => {
-        // Only handle clicks if at least one weather layer is enabled
-        if (!showPrecipitation && !showTemperature && !showHumidity) return;
+        // Only handle clicks if at least one weather layer is enabled (read latest via refs)
+        if (
+          !showPrecipitationRef.current &&
+          !showTemperatureRef.current &&
+          !showHumidityRef.current
+        )
+          return;
 
         const { lng, lat } = e.lngLat;
 
@@ -75,18 +86,20 @@ export default function MapBase({
         // Create loading popup
         const loadingPopup = new maplibregl.Popup({
           closeOnClick: false,
-          className: 'weather-popup',
-          maxWidth: 'none'
+          className: "weather-popup",
+          maxWidth: "none",
         })
           .setLngLat([lng, lat])
-          .setHTML('<div class="p-4 w-[250px] text-sm">Loading weather data...</div>')
+          .setHTML(
+            '<div class="p-4 w-[250px] text-sm">Loading weather data...</div>'
+          )
           .addTo(map);
 
         // Store popup reference
         popupRef.current = loadingPopup;
 
         // Clear popup reference when popup is closed
-        loadingPopup.on('close', () => {
+        loadingPopup.on("close", () => {
           popupRef.current = null;
         });
 
@@ -94,17 +107,25 @@ export default function MapBase({
           // Build popup content
           let popupContent = `
             <div class="p-4 min-w-[150px]">
-              <p class="text-sm mb-2"><strong>Longitude:</strong> ${lng.toFixed(4)}, <strong>Latitude:</strong> ${lat.toFixed(4)}</p>
+              <p class="text-sm mb-2"><strong>Longitude:</strong> ${lng.toFixed(
+                4
+              )}, <strong>Latitude:</strong> ${lat.toFixed(4)}</p>
           `;
 
           // Fetch precipitation data if enabled
-          if (showPrecipitation) {
+          if (showPrecipitationRef.current) {
             try {
-              const precipData = await PrecipitationService.getCurrentPrecipitationByLocation(lng, lat);
+              const precipData =
+                await PrecipitationService.getCurrentPrecipitationByLocation(
+                  lng,
+                  lat
+                );
               popupContent += `
                 <div class="mb-2 p-2 bg-cyan-50 rounded">
                   <p class="text-sm font-semibold text-cyan-800">Precipitation (1 Days)</p>
-                  <p class="text-sm">${PrecipitationService.formatPrecipitation(precipData.total_precipitation_mm)}</p>
+                  <p class="text-sm">${PrecipitationService.formatPrecipitation(
+                    precipData.total_precipitation_mm
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -118,13 +139,19 @@ export default function MapBase({
           }
 
           // Fetch temperature data if enabled
-          if (showTemperature) {
+          if (showTemperatureRef.current) {
             try {
-              const tempData = await TemperatureService.getCurrentTemperatureByLocation(lng, lat);
+              const tempData =
+                await TemperatureService.getCurrentTemperatureByLocation(
+                  lng,
+                  lat
+                );
               popupContent += `
                 <div class="mb-2 p-2 bg-orange-50 rounded">
                   <p class="text-sm font-semibold text-orange-800">Temperature</p>
-                  <p class="text-sm">${TemperatureService.formatTemperature(tempData.temperature)}</p>
+                  <p class="text-sm">${TemperatureService.formatTemperature(
+                    tempData.temperature
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -138,14 +165,19 @@ export default function MapBase({
           }
 
           // Fetch humidity data if enabled
-          if (showHumidity) {
+          if (showHumidityRef.current) {
             try {
-              const humidityData = await HumidityService.getCurrentHumidityByLocation(lng, lat);
+              const humidityData =
+                await HumidityService.getCurrentHumidityByLocation(lng, lat);
               popupContent += `
                 <div class="mb-2 p-2 bg-blue-50 rounded">
                   <p class="text-sm font-semibold text-blue-800">Humidity</p>
-                  <p class="text-sm">${HumidityService.formatHumidity(humidityData.relative_humidity)}</p>
-                  <p class="text-xs text-gray-600">Dew Point: ${HumidityService.formatDewPoint(humidityData.dew_point_celsius)}</p>
+                  <p class="text-sm">${HumidityService.formatHumidity(
+                    humidityData.relative_humidity
+                  )}</p>
+                  <p class="text-xs text-gray-600">Dew Point: ${HumidityService.formatDewPoint(
+                    humidityData.dew_point_celsius
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -158,14 +190,18 @@ export default function MapBase({
             }
           }
 
-          popupContent += '</div>';
+          popupContent += "</div>";
           loadingPopup.setHTML(popupContent);
         } catch (error) {
           console.error("Failed to fetch weather data:", error);
           loadingPopup.setHTML(`
             <div class="p-4 min-w-[200px]">
-              <p class="text-sm mb-1"><strong>Longitude:</strong> ${lng.toFixed(4)}</p>
-              <p class="text-sm mb-1"><strong>Latitude:</strong> ${lat.toFixed(4)}</p>
+              <p class="text-sm mb-1"><strong>Longitude:</strong> ${lng.toFixed(
+                4
+              )}</p>
+              <p class="text-sm mb-1"><strong>Latitude:</strong> ${lat.toFixed(
+                4
+              )}</p>
               <p class="text-sm text-red-600">Failed to load weather data</p>
             </div>
           `);
@@ -182,9 +218,9 @@ export default function MapBase({
     });
 
     return () => map.remove();
-  }, [onMapReady, showPrecipitation, showTemperature, showHumidity]);
+  }, [onMapReady]);
 
-  // Update cursor style when weather layers change
+  // Update cursor style when weather layers change (without re-creating map)
   useEffect(() => {
     if (mapRef.current) {
       const mapCanvas = mapRef.current.getCanvas();
@@ -259,11 +295,11 @@ export default function MapBase({
                   Your Location
                 </h3>
                 <p class="text-sm text-gray-600">Latitude: ${latitude.toFixed(
-            4
-          )}</p>
+                  4
+                )}</p>
                 <p class="text-sm text-gray-600">Longitude: ${longitude.toFixed(
-            4
-          )}</p>
+                  4
+                )}</p>
               </div>
             `);
 
@@ -298,7 +334,7 @@ export default function MapBase({
       {/* Air Quality Cluster Layer */}
       {mapInstance && (
         <AirQualityClusterLayer
-          map={mapInstance}
+          map={mapInstance!}
           onStationClick={handleStationClick}
           visible={showAirQuality}
         />
@@ -307,7 +343,7 @@ export default function MapBase({
       {/* Fire Data Layer */}
       {mapInstance && (
         <FireDataLayer
-          map={mapInstance}
+          map={mapInstance!}
           onFireClick={handleFireClick}
           visible={showFireData}
         />
@@ -325,24 +361,10 @@ export default function MapBase({
         onTogglePrecipitation={setShowPrecipitation}
         onToggleTemperature={setShowTemperature}
         onToggleHumidity={setShowHumidity}
+        onLocateMe={handleLocateMe}
       />
 
-      {/* Location button on map */}
-      <div className="absolute top-4 left-4 z-10">
-        <button
-          onClick={handleLocateMe}
-          className="bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 p-3 rounded-lg shadow-lg border border-gray-200 transition-all duration-200 hover:shadow-xl transform hover:scale-105"
-          title="Locate my position"
-        >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
+      {/* Removed standalone location button; now integrated into MapControls */}
     </div>
   );
 }
