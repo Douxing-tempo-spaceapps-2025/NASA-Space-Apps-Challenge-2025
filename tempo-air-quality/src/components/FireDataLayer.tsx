@@ -206,7 +206,12 @@ export default function FireDataLayer({
     map.on("click", pointId, onPointClick);
 
     return () => {
-      if (map.getLayer(pointId)) map.off("click", pointId, onPointClick);
+      // Guard against cases where map is undefined/destroyed during unmount
+      if (!map) return;
+      const hasGetLayer = typeof (map as any).getLayer === "function";
+      if (hasGetLayer && map.getLayer(pointId)) {
+        map.off("click", pointId, onPointClick);
+      }
       // Do not remove layers/sources here; keep for visibility toggling
     };
   }, [map, fireData, visible, onFireClick]);
@@ -224,8 +229,11 @@ export default function FireDataLayer({
     return () => {
       const srcId = sourceId.current;
       const pointId = pointLayerId.current;
-      if (map.getLayer(pointId)) map.removeLayer(pointId);
-      if (map.getSource(srcId)) map.removeSource(srcId);
+      if (!map) return;
+      const hasGetLayer = typeof (map as any).getLayer === "function";
+      const hasGetSource = typeof (map as any).getSource === "function";
+      if (hasGetLayer && map.getLayer(pointId)) map.removeLayer(pointId);
+      if (hasGetSource && map.getSource(srcId)) map.removeSource(srcId);
     };
   }, [map]);
 

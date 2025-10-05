@@ -38,6 +38,19 @@ export default function MapBase({
   const [showHumidity, setShowHumidity] = useState(true);
   const [showFireRisk, setShowFireRisk] = useState(true);
 
+  // Keep refs with latest toggle states for event handlers attached once
+  const showPrecipitationRef = useRef(showPrecipitation);
+  const showTemperatureRef = useRef(showTemperature);
+  const showHumidityRef = useRef(showHumidity);
+  const showFireRiskRef = useRef(showFireRisk);
+
+  useEffect(() => {
+    showPrecipitationRef.current = showPrecipitation;
+    showTemperatureRef.current = showTemperature;
+    showHumidityRef.current = showHumidity;
+    showFireRiskRef.current = showFireRisk;
+  }, [showPrecipitation, showTemperature, showHumidity, showFireRisk]);
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -64,8 +77,14 @@ export default function MapBase({
 
       // Add click event for weather data
       map.on("click", async (e) => {
-        // Only handle clicks if at least one weather layer is enabled
-        if (!showPrecipitation && !showTemperature && !showHumidity && !showFireRisk) return;
+        // Only handle clicks if at least one weather layer is enabled (use refs for latest state)
+        if (
+          !showPrecipitationRef.current &&
+          !showTemperatureRef.current &&
+          !showHumidityRef.current &&
+          !showFireRiskRef.current
+        )
+          return;
 
         const { lng, lat } = e.lngLat;
 
@@ -77,18 +96,20 @@ export default function MapBase({
         // Create loading popup
         const loadingPopup = new maplibregl.Popup({
           closeOnClick: false,
-          className: 'weather-popup',
-          maxWidth: 'none'
+          className: "weather-popup",
+          maxWidth: "none",
         })
           .setLngLat([lng, lat])
-          .setHTML('<div class="p-4 w-[250px] text-sm">Loading weather data...</div>')
+          .setHTML(
+            '<div class="p-4 w-[250px] text-sm">Loading weather data...</div>'
+          )
           .addTo(map);
 
         // Store popup reference
         popupRef.current = loadingPopup;
 
         // Clear popup reference when popup is closed
-        loadingPopup.on('close', () => {
+        loadingPopup.on("close", () => {
           popupRef.current = null;
         });
 
@@ -96,17 +117,25 @@ export default function MapBase({
           // Build popup content
           let popupContent = `
             <div class="p-4 min-w-[150px]">
-              <p class="text-sm mb-2"><strong>Longitude:</strong> ${lng.toFixed(4)}, <strong>Latitude:</strong> ${lat.toFixed(4)}</p>
+              <p class="text-sm mb-2"><strong>Longitude:</strong> ${lng.toFixed(
+                4
+              )}, <strong>Latitude:</strong> ${lat.toFixed(4)}</p>
           `;
 
           // Fetch precipitation data if enabled
-          if (showPrecipitation) {
+          if (showPrecipitationRef.current) {
             try {
-              const precipData = await PrecipitationService.getCurrentPrecipitationByLocation(lng, lat);
+              const precipData =
+                await PrecipitationService.getCurrentPrecipitationByLocation(
+                  lng,
+                  lat
+                );
               popupContent += `
                 <div class="mb-2 p-2 bg-cyan-50 rounded">
                   <p class="text-sm font-semibold text-cyan-800">Precipitation (1 Days)</p>
-                  <p class="text-sm">${PrecipitationService.formatPrecipitation(precipData.total_precipitation_mm)}</p>
+                  <p class="text-sm">${PrecipitationService.formatPrecipitation(
+                    precipData.total_precipitation_mm
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -120,13 +149,19 @@ export default function MapBase({
           }
 
           // Fetch temperature data if enabled
-          if (showTemperature) {
+          if (showTemperatureRef.current) {
             try {
-              const tempData = await TemperatureService.getCurrentTemperatureByLocation(lng, lat);
+              const tempData =
+                await TemperatureService.getCurrentTemperatureByLocation(
+                  lng,
+                  lat
+                );
               popupContent += `
                 <div class="mb-2 p-2 bg-orange-50 rounded">
                   <p class="text-sm font-semibold text-orange-800">Temperature</p>
-                  <p class="text-sm">${TemperatureService.formatTemperature(tempData.temperature)}</p>
+                  <p class="text-sm">${TemperatureService.formatTemperature(
+                    tempData.temperature
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -140,14 +175,19 @@ export default function MapBase({
           }
 
           // Fetch humidity data if enabled
-          if (showHumidity) {
+          if (showHumidityRef.current) {
             try {
-              const humidityData = await HumidityService.getCurrentHumidityByLocation(lng, lat);
+              const humidityData =
+                await HumidityService.getCurrentHumidityByLocation(lng, lat);
               popupContent += `
                 <div class="mb-2 p-2 bg-blue-50 rounded">
                   <p class="text-sm font-semibold text-blue-800">Humidity</p>
-                  <p class="text-sm">${HumidityService.formatHumidity(humidityData.relative_humidity)}</p>
-                  <p class="text-xs text-gray-600">Dew Point: ${HumidityService.formatDewPoint(humidityData.dew_point_celsius)}</p>
+                  <p class="text-sm">${HumidityService.formatHumidity(
+                    humidityData.relative_humidity
+                  )}</p>
+                  <p class="text-xs text-gray-600">Dew Point: ${HumidityService.formatDewPoint(
+                    humidityData.dew_point_celsius
+                  )}</p>
                 </div>
               `;
             } catch (error) {
@@ -161,15 +201,24 @@ export default function MapBase({
           }
 
           // Fetch fire risk data if enabled
-          if (showFireRisk) {
+          if (showFireRiskRef.current) {
             try {
-              const fireRiskData = await FireRiskService.getFireRiskByLocation(lng, lat);
-              const riskLevel = FireRiskService.getFireRiskLevel(fireRiskData.wildfire_risk_index);
-              const riskColor = FireRiskService.getFireRiskColor(fireRiskData.wildfire_risk_index);
+              const fireRiskData = await FireRiskService.getFireRiskByLocation(
+                lng,
+                lat
+              );
+              const riskLevel = FireRiskService.getFireRiskLevel(
+                fireRiskData.wildfire_risk_index
+              );
+              const riskColor = FireRiskService.getFireRiskColor(
+                fireRiskData.wildfire_risk_index
+              );
               popupContent += `
                 <div class="mb-2 p-2 bg-red-50 rounded">
                   <p class="text-sm font-semibold text-red-800">Fire Risk</p>
-                  <p class="text-sm">Index: ${FireRiskService.formatFireRiskIndex(fireRiskData.wildfire_risk_index)}</p>
+                  <p class="text-sm">Index: ${FireRiskService.formatFireRiskIndex(
+                    fireRiskData.wildfire_risk_index
+                  )}</p>
                   <p class="text-xs text-gray-600">Level: ${riskLevel}</p>
                 </div>
               `;
@@ -183,14 +232,18 @@ export default function MapBase({
             }
           }
 
-          popupContent += '</div>';
+          popupContent += "</div>";
           loadingPopup.setHTML(popupContent);
         } catch (error) {
           console.error("Failed to fetch weather data:", error);
           loadingPopup.setHTML(`
             <div class="p-4 min-w-[200px]">
-              <p class="text-sm mb-1"><strong>Longitude:</strong> ${lng.toFixed(4)}</p>
-              <p class="text-sm mb-1"><strong>Latitude:</strong> ${lat.toFixed(4)}</p>
+              <p class="text-sm mb-1"><strong>Longitude:</strong> ${lng.toFixed(
+                4
+              )}</p>
+              <p class="text-sm mb-1"><strong>Latitude:</strong> ${lat.toFixed(
+                4
+              )}</p>
               <p class="text-sm text-red-600">Failed to load weather data</p>
             </div>
           `);
@@ -207,13 +260,18 @@ export default function MapBase({
     });
 
     return () => map.remove();
-  }, [onMapReady, showPrecipitation, showTemperature, showHumidity, showFireRisk]);
+  }, [onMapReady]);
 
   // Update cursor style when weather layers change
   useEffect(() => {
     if (mapRef.current) {
       const mapCanvas = mapRef.current.getCanvas();
-      if (showPrecipitation || showTemperature || showHumidity || showFireRisk) {
+      if (
+        showPrecipitation ||
+        showTemperature ||
+        showHumidity ||
+        showFireRisk
+      ) {
         mapCanvas.style.cursor = "crosshair";
       } else {
         mapCanvas.style.cursor = "";
@@ -284,11 +342,11 @@ export default function MapBase({
                   Your Location
                 </h3>
                 <p class="text-sm text-gray-600">Latitude: ${latitude.toFixed(
-            4
-          )}</p>
+                  4
+                )}</p>
                 <p class="text-sm text-gray-600">Longitude: ${longitude.toFixed(
-            4
-          )}</p>
+                  4
+                )}</p>
               </div>
             `);
 

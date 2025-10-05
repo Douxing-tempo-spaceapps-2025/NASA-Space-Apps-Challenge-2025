@@ -187,7 +187,7 @@ export default function AirQualityClusterLayer({
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         transition: all 0.2s ease-in-out;
-        z-index: 500;
+        z-index: 1;
       `;
 
       // Create tooltip element
@@ -268,7 +268,7 @@ export default function AirQualityClusterLayer({
         border-radius: 50%;
         cursor: pointer;
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        z-index: 1000;
+        z-index: 2;
       `;
 
       const marker = new maplibregl.Marker({ element: el })

@@ -320,35 +320,45 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#0D47A1" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very Cold (&lt;-10°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Very Cold (&lt;-10°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1565C0" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Cold (-10 to 0°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Cold (-10 to 0°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#42A5F5" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Cool (0 to 10°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Cool (0 to 10°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#90CAF9" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Mild (10 to 20°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Mild (10 to 20°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#FFB74D" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Warm (20 to 30°C)</span>
+                  <span className="text-xs text-gray-600">
+                    Warm (20 to 30°C)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -376,7 +386,9 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#E3F2FD" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very Dry (&lt;30%)</span>
+                  <span className="text-xs text-gray-600">
+                    Very Dry (&lt;30%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -397,14 +409,18 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1E88E5" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Moderate (50-60%)</span>
+                  <span className="text-xs text-gray-600">
+                    Moderate (50-60%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#1565C0" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Comfortable (60-70%)</span>
+                  <span className="text-xs text-gray-600">
+                    Comfortable (60-70%)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -432,7 +448,9 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#4CAF50" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very Low (&lt;-10)</span>
+                  <span className="text-xs text-gray-600">
+                    Very Low (&lt;-10)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -446,7 +464,9 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#FFEB3B" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Moderate (-5 to 0)</span>
+                  <span className="text-xs text-gray-600">
+                    Moderate (-5 to 0)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -460,7 +480,9 @@ export default function MapControls({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: "#FF5722" }}
                   ></div>
-                  <span className="text-xs text-gray-600">Very High (5 to 10)</span>
+                  <span className="text-xs text-gray-600">
+                    Very High (5 to 10)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
