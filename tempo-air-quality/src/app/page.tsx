@@ -6,6 +6,7 @@ import LocationPanel from "@/components/LocationPanel";
 import PrecipitationPanel from "@/components/PrecipitationPanel";
 import TemperaturePanel from "@/components/TemperaturePanel";
 import HumidityPanel from "@/components/HumidityPanel";
+import FireRiskPanel from "@/components/FireRiskPanel";
 import type { Map } from "maplibre-gl";
 
 export default function Home() {
@@ -57,6 +58,11 @@ export default function Home() {
         {/* Humidity Panel */}
         <div className="mb-4">
           <HumidityPanel selectedLocation={selectedLocation} />
+        </div>
+
+        {/* Fire Risk Panel */}
+        <div className="mb-4">
+          <FireRiskPanel selectedLocation={selectedLocation} />
         </div>
 
         {/* Status Panel */}

@@ -10,7 +10,7 @@ import numpy as np
 
 class BaseWeatherData(BaseModel):
     """Base weather data model"""
-    
+
     longitude: float
     latitude: float
     timestamp: str
@@ -60,7 +60,6 @@ class HumidityData(BaseWeatherData):
     temperature_celsius: float
 
 
-
 class HumidityDataResponse(BaseModel):
     """Humidity data API response"""
 
@@ -79,6 +78,26 @@ class WindFieldDataResponse(BaseModel):
 class PrecipitationDataResponse(BaseModel):
     data: List[PrecipitationData]
     metadata: dict
+
+
+class FireRiskData(BaseModel):
+    """Fire risk data model"""
+
+    longitude: float
+    latitude: float
+    wildfire_risk_index: float
+    component_data: Dict[str, float]  # temperature, humidity, wind_speed, precipitation
+    metadata: Dict[str, Any]
+
+
+class FireRiskDataResponse(BaseModel):
+    """Fire risk data API response"""
+
+    longitude: float
+    latitude: float
+    wildfire_risk_index: float
+    component_data: Dict[str, float]
+    metadata: Dict[str, Any]
 
 
 class WeatherDataRequest(BaseModel):

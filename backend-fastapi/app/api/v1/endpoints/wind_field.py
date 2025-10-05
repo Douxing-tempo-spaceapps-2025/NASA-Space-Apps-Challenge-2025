@@ -7,7 +7,7 @@ from fastapi import HTTPException, Query
 from fastapi.routing import APIRouter
 from typing import List, Optional
 from app.models.weather_data import WindFieldDataResponse, WindParticleData
-from app.services.wind_field_service import wind_field_service
+#from app.services.wind_field_service import wind_field_service
 
 router = APIRouter()
 

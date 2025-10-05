@@ -6,13 +6,14 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     air_quality,
-    fire_data, 
-    tempo_data, 
+    fire_data,
+    fire_risk,
+    tempo_data,
     tempo_l3_data,
     precipitation,
     temperature,
     wind_field,
-    humidity
+    humidity,
 )
 
 
@@ -24,6 +25,8 @@ api_router.include_router(
 )
 
 api_router.include_router(fire_data.router, prefix="/fire-data", tags=["Fire Data"])
+
+api_router.include_router(fire_risk.router, prefix="/fire-risk", tags=["Fire Risk"])
 
 
 api_router.include_router(
@@ -48,14 +51,8 @@ api_router.include_router(
     tags=["Wind Field"],
 )
 
-api_router.include_router(
-    tempo_data.router, 
-    prefix="/tempo-data", 
-    tags=["TEMPO Data"]
-)
+api_router.include_router(tempo_data.router, prefix="/tempo-data", tags=["TEMPO Data"])
 
 api_router.include_router(
-    tempo_l3_data.router, 
-    prefix="/tempo-l3", 
-    tags=["TEMPO L3 Data"]
+    tempo_l3_data.router, prefix="/tempo-l3", tags=["TEMPO L3 Data"]
 )
