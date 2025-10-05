@@ -1,0 +1,61 @@
+# FastAPI核心依赖
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# 数据验证和序列化
+pydantic==2.9.0
+pydantic-settings==2.6.0
+
+# HTTP客户端（用于调用外部API）
+httpx==0.25.2
+aiohttp==3.9.1
+
+# 数据库相关（如果需要）
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# 日志
+loguru==0.7.2
+
+# 定时任务（对应您现有的scheduler）
+apscheduler==3.10.4
+
+# 开发工具
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+
+# CORS支持
+python-multipart==0.0.6
+
+# NASA Earthdata access
+earthaccess==0.12.0
+harmony-py>=1.0.0
+
+# Scientific data processing
+xarray>=2023.12.0
+netCDF4>=1.6.5
+h5py>=3.10.0
+numpy>=1.26.0
+pandas>=2.1.4
+
+
+# NASA Earthdata访问
+earthaccess==0.12.0
+
+# 科学数据处理
+xarray==2023.12.0
+netcdf4==1.6.5
+h5netcdf==1.2.0
+
+# 数值计算
+numpy==1.24.3
+pandas==2.0.3
+
+boto3
+h5py>=3.7.0

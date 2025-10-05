@@ -30,3 +30,68 @@ body {
   width: 100%;
   height: 100vh;
 }
+
+/* Air Quality Cluster Markers */
+.cluster-marker {
+  transition: box-shadow 0.2s ease-in-out;
+  position: relative;
+  z-index: 1000;
+}
+
+.cluster-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 1000;
+  margin-bottom: 8px;
+}
+
+.cluster-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+.station-marker {
+  transition: all 0.2s ease-in-out;
+  z-index: 1000;
+}
+
+.station-marker:hover {
+  transform: scale(1.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* MapLibre Popup Styling */
+.maplibregl-popup-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.maplibregl-popup-tip {
+  border-top-color: white;
+}
+
+/* Weather Popup - Ensure it's on top of all markers */
+.weather-popup .maplibregl-popup-content {
+  z-index: 9999 !important;
+  position: relative;
+}
+
+.weather-popup {
+  z-index: 9999 !important;
+}

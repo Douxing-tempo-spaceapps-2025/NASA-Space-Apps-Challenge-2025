@@ -7,6 +7,11 @@ import Image from "next/image";
 
 interface LocationPanelProps {
   mapRef: Map | null;
+  onLocationSelect?: (location: {
+    longitude: number;
+    latitude: number;
+    name?: string;
+  }) => void;
 }
 
 interface CitySuggestion {
@@ -32,7 +37,10 @@ interface GeocodingFeature {
   }>;
 }
 
-export default function LocationPanel({ mapRef }: LocationPanelProps) {
+export default function LocationPanel({
+  mapRef,
+  onLocationSelect,
+}: LocationPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -88,8 +96,7 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
         const response = await fetch(
           `https://api.maptiler.com/geocoding/${encodeURIComponent(
             searchValue
-          )}.json?key=${
-            process.env.NEXT_PUBLIC_MAPTILER_KEY
+          )}.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY
           }&limit=10&country=US&types=place,postal_code,address,poi,locality,municipality`
         );
 
@@ -170,6 +177,15 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
       setShowSuggestions(false);
       setSuggestions([]);
 
+      // Notify parent component
+      if (onLocationSelect) {
+        onLocationSelect({
+          longitude: city.coordinates[0],
+          latitude: city.coordinates[1],
+          name: zipCode,
+        });
+      }
+
       // Use the coordinates we already have from the suggestion
       mapRef.flyTo({
         center: city.coordinates,
@@ -193,11 +209,11 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
                ZIP Code: ${zipCode}
              </h3>
              <p class="text-sm text-gray-600">Latitude: ${city.coordinates[1].toFixed(
-               4
-             )}</p>
+        4
+      )}</p>
              <p class="text-sm text-gray-600">Longitude: ${city.coordinates[0].toFixed(
-               4
-             )}</p>
+        4
+      )}</p>
            </div>
          `);
 
@@ -214,6 +230,15 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
     setSearchQuery(`${city.name}, ${city.state}`);
     setShowSuggestions(false);
     setSuggestions([]);
+
+    // Notify parent component
+    if (onLocationSelect) {
+      onLocationSelect({
+        longitude: city.coordinates[0],
+        latitude: city.coordinates[1],
+        name: `${city.name}, ${city.state}`,
+      });
+    }
 
     // Fly to city
     mapRef.flyTo({
@@ -238,11 +263,11 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
              ${city.name}, ${city.state}
            </h3>
            <p class="text-sm text-gray-600">Latitude: ${city.coordinates[1].toFixed(
-             4
-           )}</p>
+      4
+    )}</p>
            <p class="text-sm text-gray-600">Longitude: ${city.coordinates[0].toFixed(
-             4
-           )}</p>
+      4
+    )}</p>
          </div>
        `);
 
@@ -269,8 +294,7 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
       const response = await fetch(
         `https://api.maptiler.com/geocoding/${encodeURIComponent(
           codeToSearch
-        )}.json?key=${
-          process.env.NEXT_PUBLIC_MAPTILER_KEY
+        )}.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY
         }&limit=1&country=US&types=postal_code`
       );
 
@@ -306,11 +330,11 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
                    ZIP Code: ${codeToSearch}
                  </h3>
                <p class="text-sm text-gray-600">Latitude: ${latitude.toFixed(
-                 4
-               )}</p>
+          4
+        )}</p>
                <p class="text-sm text-gray-600">Longitude: ${longitude.toFixed(
-                 4
-               )}</p>
+          4
+        )}</p>
              </div>
            `);
 
@@ -346,7 +370,7 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
       (city) =>
         city.name.toLowerCase() === searchQuery.toLowerCase() ||
         `${city.name}, ${city.state}`.toLowerCase() ===
-          searchQuery.toLowerCase()
+        searchQuery.toLowerCase()
     );
 
     if (exactMatch) {
@@ -505,12 +529,12 @@ export default function LocationPanel({ mapRef }: LocationPanelProps) {
                       {city.isZIP
                         ? "ZIP Code"
                         : city.isCity
-                        ? "City"
-                        : city.isAddress
-                        ? "Address"
-                        : city.isPOI
-                        ? "Point of Interest"
-                        : city.state}
+                          ? "City"
+                          : city.isAddress
+                            ? "Address"
+                            : city.isPOI
+                              ? "Point of Interest"
+                              : city.state}
                     </div>
                   </button>
                 ))}
