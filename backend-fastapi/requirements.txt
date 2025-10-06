@@ -15,7 +15,7 @@ sqlalchemy==2.0.23
 alembic==1.13.1
 
 # Environment variables
-python-dotenv==1.0.0
+python-dotenv==0.20.0
 
 # Logging
 loguru==0.7.2
