@@ -23,9 +23,10 @@ earthaccess==0.12.0
 
 
 # Scientific Computing (compatible versions)
+Cython==0.29.36
 numpy>=1.24.0,<2.1.0
 xarray>=2023.12.0
-netCDF4>=1.6.5
+netCDF4==1.6.4 
 h5py>=3.10.0
 pandas>=2.1.4,<2.3.0
 
