@@ -1,50 +1,37 @@
-# FastAPI core
+
+# Core FastAPI
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 
-# Data validation & settings
+# Data Validation
 pydantic==2.9.0
 pydantic-settings==2.6.0
 
-# HTTP clients (external APIs)
+# HTTP Clients
 httpx==0.25.2
 aiohttp==3.9.1
 
-# Database (optional)
-sqlalchemy==2.0.23
-alembic==1.13.1
-
-# Environment variables
-python-dotenv==0.20.0
+# Environment
+python-dotenv==1.0.0
+python-multipart==0.0.6
 
 # Logging
 loguru==0.7.2
 
-# Scheduling
-apscheduler==3.10.4
-
-# Developer tools
-pytest==7.4.3
-pytest-asyncio==0.21.1
-black==23.11.0
-isort==5.12.0
-flake8==6.1.0
-
-# Form data (multipart)
-python-multipart==0.0.6
-
-# NASA Earthdata access
+# NASA Data Access
 earthaccess==0.12.0
-harmony-py>=1.0.0
+harmony-py==1.3.0
 
-# Scientific data processing
+# Scientific Computing (compatible versions)
+numpy>=1.24.0,<2.1.0
 xarray>=2023.12.0
 netCDF4>=1.6.5
-h5netcdf>=1.2.0
 h5py>=3.10.0
-numpy>=1.26.0
-pandas>=2.1.4
+pandas>=2.1.4,<2.3.0
 
-# AWS SDK (optional, for S3 etc.)
-boto3
+# AWS (if needed)
+boto3>=1.28.0
 
+# Core dependencies
+typing-extensions>=4.8.0
+python-dateutil>=2.8.2
